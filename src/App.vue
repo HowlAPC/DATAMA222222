@@ -87,6 +87,18 @@ async function logout() {
   await supabase.auth.signOut()
   location.reload()
 }
+async function markAsPaid(receipt_id) {
+  const { error } = await supabase.rpc('mark_receipt_paid', {
+    p_receipt_id: receipt_id
+  });
+
+  if (error) {
+    alert('Error marking as paid: ' + error.message);
+  } else {
+    fetchAllData(); // Refresh receipts & payments
+  }
+}
+
 </script>
 
 <template>
@@ -176,14 +188,24 @@ async function logout() {
               <td>{{ row.weight }} kg</td>
               <td>₱{{ row.price }}</td>
             </template>
-            <template v-if="activeTab==='receipts'">
+            <template v-if="activeTab === 'receipts'">
               <td>{{ row.receipt_id }}</td>
               <td>{{ row.customer_id }}</td>
               <td>{{ row.employee_id }}</td>
               <td>₱{{ row.total_amount }}</td>
-              <td>{{ row.status }}</td>
+              <td>
+                {{ row.status }}
+                <button 
+                  v-if="row.status !== 'Paid'" 
+                  @click="markAsPaid(row.receipt_id)" 
+                  class="btn-pay"
+                >
+                  Mark as Paid
+                </button>
+              </td>
               <td>{{ new Date(row.date_created).toLocaleString() }}</td>
             </template>
+
             <template v-if="activeTab==='payments'">
               <td>{{ row.payment_id }}</td>
               <td>{{ row.receipt_id }}</td>
