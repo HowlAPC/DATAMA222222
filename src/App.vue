@@ -15,6 +15,11 @@ const searchQuery = ref('')
 const activeTab = ref('customers')
 const isModalOpen = ref(false)
 
+// Login
+const user = ref(null)
+import Login from './components/Login.vue'
+
+
 // List of all tables to display in the tabs
 const tabs = ['customers', 'employees', 'items', 'receipts', 'payments']
 
@@ -65,13 +70,37 @@ const filteredData = computed(() => {
   })
 })
 
-onMounted(fetchAllData)
+// Login
+onMounted(async () => {
+  const { data } = await supabase.auth.getUser()
+  user.value = data.user
+
+  if (user.value) {
+    fetchAllData()
+  }
+})
+
+// Login
+async function logout() {
+  await supabase.auth.signOut()
+  location.reload()
+}
+
 </script>
 
 <template>
-  <main class="dashboard">
+
+  <Login v-if="!user" />
+
+  <main v-else class="dashboard">
+
+    
     <header>
       <div class="top-bar">
+        <button @click="logout" class="add-btn" style="background:#ef4444;">
+  Logout
+</button>
+
         <h1>Laundry Business Management</h1>
         <button 
           v-if="['customers', 'employees', 'items'].includes(activeTab)"
@@ -164,6 +193,8 @@ onMounted(fetchAllData)
     />
   </main>
 </template>
+
+
 
 <style scoped>
 .dashboard { padding: 2rem; max-width: 1200px; margin: auto; font-family: 'Inter', sans-serif; }
