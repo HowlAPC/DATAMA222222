@@ -1,51 +1,41 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { supabase } from './supabase' // Your Step 3 setup
+import { supabase } from './lib/supabase'
 import RecordForm from './components/RecordForm.vue'
 import RecordItem from './components/RecordItem.vue'
 
 const records = ref([])
 
-// FETCH ALL
-const fetchRecords = async () => {
+// GET RECORDS
+async function getRecords() {
   const { data } = await supabase.from('tasks').select('*').order('id', { ascending: false })
   records.value = data
 }
 
-// CREATE
-const handleAdd = async (title) => {
-  const { data, error } = await supabase
-    .from('tasks')
-    .insert([{ title }])
-    .select()
-  
-  if (!error) records.value.unshift(data[0])
+// INSERT RECORD
+async function addRecord(title) {
+  const { data } = await supabase.from('tasks').insert([{ title }]).select()
+  if (data) records.value.unshift(data[0])
 }
 
-// DELETE
-const handleDelete = async (id) => {
+// DELETE RECORD
+async function deleteRecord(id) {
   const { error } = await supabase.from('tasks').delete().eq('id', id)
-  if (!error) {
-    records.value = records.value.filter(r => r.id !== id)
-  }
+  if (!error) records.value = records.value.filter(r => r.id !== id)
 }
 
-onMounted(fetchRecords)
+onMounted(getRecords)
 </script>
 
 <template>
-  <div class="container">
-    <h1>Supabase Dashboard</h1>
-    
-    <RecordForm @add-record="handleAdd" />
-
-    <div class="list-container">
-      <RecordItem 
-        v-for="item in records" 
-        :key="item.id" 
-        :record="item" 
-        @delete="handleDelete"
-      />
-    </div>
-  </div>
+  <main>
+    <h1>Supabase + Vue CRUD</h1>
+    <RecordForm @add="addRecord" />
+    <RecordItem 
+      v-for="record in records" 
+      :key="record.id" 
+      :item="record" 
+      @remove="deleteRecord" 
+    />
+  </main>
 </template>
