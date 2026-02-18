@@ -104,6 +104,8 @@ async function logout() {
 
         <div style="display:flex; align-items:center; gap:10px;">
           <h1>Laundry Business Management</h1>
+          <span v-if="userRole === 'admin'" class="admin-badge">ADMIN</span>
+
 
           <span v-if="userRole === 'admin'" class="admin-badge">
             ADMIN
@@ -183,6 +185,8 @@ async function logout() {
               <td>{{ row.employee_id }}</td>
               <td>{{ row.first_name }} {{ row.last_name }}</td>
               <td><span class="badge">{{ row.employee_type }}</span></td>
+              <td v-if="userRole === 'admin'">₱{{ row.salary }}</td>
+              <td v-else>Hidden</td> <!-- optional: show “Hidden” for employees -->
               <td>
                 <span v-if="userRole === 'admin'">
                   ₱{{ row.salary }}
