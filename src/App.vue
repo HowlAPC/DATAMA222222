@@ -202,13 +202,12 @@ async function logout() {
     <RecordModal 
       :isOpen="isModalOpen" 
       :activeTab="activeTab" 
-      :customers="customers"
+      @close="isModalOpen=false" 
+      @refresh="fetchAllData" 
+      :customers="customers" 
       :employees="employees"
       :receipts="receipts"
-      @close="isModalOpen = false" 
-      @refresh="fetchAllData" 
     />
-
   </main>
 </template>
 
