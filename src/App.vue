@@ -151,49 +151,100 @@ async function logout() {
     </div>
 
     <div v-else class="content">
-      <table>
-        <thead>
-          <tr v-if="activeTab === 'customers'">
-            <th>ID</th><th>First Name</th><th>Last Name</th><th>Contact</th>
-          </tr>
-          <tr v-if="activeTab === 'employees'">
-            <th>ID</th><th>Name</th><th>Position</th><th>Salary</th>
-          </tr>
-          <tr v-if="activeTab === 'items'">
-            <th>ID</th><th>Type</th><th>Fabric</th><th>Weight</th><th>Price</th>
-          </tr>
-          <tr v-if="activeTab === 'receipts'">
-            <th>Receipt #</th><th>Status</th><th>Total</th><th>Date</th>
-          </tr>
-          <tr v-if="activeTab === 'payments'">
-            <th>Payment ID</th><th>Receipt #</th><th>Amount</th><th>Date</th>
-          </tr>
-        </thead>
-        
-        <tbody>
-          <tr v-for="row in filteredData" :key="row.id || row.customer_id || row.employee_id || row.item_id || row.receipt_id || row.payment_id">
-            <template v-if="activeTab === 'customers'">
-              <td>{{ row.customer_id }}</td><td>{{ row.first_name }}</td><td>{{ row.last_name }}</td><td>{{ row.contact_number }}</td>
-            </template>
-            
-            <template v-if="activeTab === 'employees'">
-              <td>{{ row.employee_id }}</td><td>{{ row.first_name }} {{ row.last_name }}</td><td><span class="badge">{{ row.employee_type }}</span></td><td>₱{{ row.salary }}</td>
-            </template>
-            
-            <template v-if="activeTab === 'items'">
-              <td>{{ row.item_id }}</td><td>{{ row.item_type }}</td><td>{{ row.fabric_type }}</td><td>{{ row.weight }}kg</td><td>₱{{ row.price }}</td>
-            </template>
+<table>
+  <thead>
+    <tr v-if="activeTab === 'customers'">
+      <th>ID</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Contact</th>
+      <th>Special Instructions</th>
+      <th>Created At</th>
+    </tr>
+    <tr v-if="activeTab === 'employees'">
+      <th>ID</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Contact</th>
+      <th>Salary</th>
+      <th>Position</th>
+      <th>Created At</th>
+    </tr>
+    <tr v-if="activeTab === 'items'">
+      <th>ID</th>
+      <th>Receipt ID</th>
+      <th>Type</th>
+      <th>Fabric</th>
+      <th>Weight</th>
+      <th>Price</th>
+    </tr>
+    <tr v-if="activeTab === 'receipts'">
+      <th>ID</th>
+      <th>Customer ID</th>
+      <th>Employee ID</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+    <tr v-if="activeTab === 'payments'">
+      <th>ID</th>
+      <th>Receipt ID</th>
+      <th>Amount</th>
+      <th>Date</th>
+    </tr>
+  </thead>
 
-            <template v-if="activeTab === 'receipts'">
-              <td>{{ row.receipt_id }}</td><td><span class="status-pill">{{ row.status }}</span></td><td>₱{{ row.total_amount }}</td><td>{{ new Date(row.date_created).toLocaleDateString() }}</td>
-            </template>
+  <tbody>
+    <tr v-for="row in filteredData" :key="row.id || row.customer_id || row.employee_id || row.item_id || row.receipt_id || row.payment_id">
+      
+      <template v-if="activeTab === 'customers'">
+        <td>{{ row.customer_id }}</td>
+        <td>{{ row.first_name }}</td>
+        <td>{{ row.last_name }}</td>
+        <td>{{ row.contact_number }}</td>
+        <td>{{ row.special_instructions || '-' }}</td>
+        <td>{{ new Date(row.created_at).toLocaleString() }}</td>
+      </template>
+      
+      <template v-if="activeTab === 'employees'">
+        <td>{{ row.employee_id }}</td>
+        <td>{{ row.first_name }}</td>
+        <td>{{ row.last_name }}</td>
+        <td>{{ row.contact_number }}</td>
+        <td>₱{{ row.salary }}</td>
+        <td>{{ row.employee_type }}</td>
+        <td>{{ new Date(row.created_at).toLocaleString() }}</td>
+      </template>
+      
+      <template v-if="activeTab === 'items'">
+        <td>{{ row.item_id }}</td>
+        <td>{{ row.receipt_id }}</td>
+        <td>{{ row.item_type }}</td>
+        <td>{{ row.fabric_type }}</td>
+        <td>{{ row.weight }} kg</td>
+        <td>₱{{ row.price }}</td>
+      </template>
+      
+      <template v-if="activeTab === 'receipts'">
+        <td>{{ row.receipt_id }}</td>
+        <td>{{ row.customer_id }}</td>
+        <td>{{ row.employee_id }}</td>
+        <td>₱{{ row.total_amount }}</td>
+        <td>{{ row.status }}</td>
+        <td>{{ new Date(row.date_created).toLocaleString() }}</td>
+      </template>
+      
+      <template v-if="activeTab === 'payments'">
+        <td>{{ row.payment_id }}</td>
+        <td>{{ row.receipt_id }}</td>
+        <td>₱{{ row.amount_paid }}</td>
+        <td>{{ new Date(row.payment_date).toLocaleString() }}</td>
+      </template>
 
-            <template v-if="activeTab === 'payments'">
-              <td>{{ row.payment_id }}</td><td>{{ row.receipt_id }}</td><td>₱{{ row.amount_paid }}</td><td>{{ new Date(row.payment_date).toLocaleDateString() }}</td>
-            </template>
-          </tr>
-        </tbody>
-      </table>
+    </tr>
+  </tbody>
+</table>
+  
       
       <div v-if="filteredData.length === 0" class="empty-state">
         No records found matching your search.
