@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { supabase } from './lib/supabase'
+import { supabase } from './supabase'
 import RecordForm from './components/RecordForm.vue'
 import RecordItem from './components/RecordItem.vue'
 
