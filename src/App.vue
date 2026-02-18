@@ -200,14 +200,15 @@ async function logout() {
     </div>
 
     <RecordModal 
-      :isOpen="isModalOpen" 
-      :activeTab="activeTab" 
-      @close="isModalOpen=false" 
-      @refresh="fetchAllData" 
-      :customers="customers" 
+      :isOpen="isModalOpen"
+      :activeTab="activeTab"
+      :customers="customers"
       :employees="employees"
       :receipts="receipts"
+      @close="isModalOpen = false"
+      @refresh="fetchAllData"
     />
+
   </main>
 </template>
 
