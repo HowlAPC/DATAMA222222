@@ -50,7 +50,7 @@
       <p><strong>Instructions:</strong> {{ row.special_instructions || '-' }}</p>
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
 <button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
-<button @click="deleteCustomer(row.customer_id)">Delete</button>
+<button @click="deleteCustomer(row.customer_id)" class="btn-delete">Delete</button>
     </template>
 
     <!-- Employees -->
@@ -62,7 +62,7 @@
       <p><strong>Position:</strong> {{ row.employee_type }}</p>
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
 <button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
-<button @click="deleteEmployee(row.employee_id)">Delete</button>
+<button @click="deleteEmployee(row.employee_id)" class="btn-delete">Delete</button>
     </template>
 
     <!-- Items -->
@@ -73,7 +73,7 @@
       <p><strong>Weight:</strong> {{ row.weight }} kg</p>
       <p><strong>Price:</strong> ₱{{ row.price }}</p>
 <button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
-<button @click="deleteItem(row.item_id)">Delete</button>
+<button @click="deleteItem(row.item_id)" class="btn-delete">Delete</button>
     </template>
 
     <!-- Receipts -->
@@ -87,7 +87,7 @@
       </p>
       <p><strong>Date:</strong> {{ new Date(row.date_created).toLocaleString() }}</p>
 <button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
-<button @click="deleteReceipt(row.receipt_id)">Delete</button>
+<button @click="deleteReceipt(row.receipt_id)" class="btn-delete">Delete</button>
     </template>
 
     <!-- Payments -->
@@ -97,7 +97,7 @@
       <p><strong>Amount:</strong> ₱{{ row.amount_paid }}</p>
       <p><strong>Date:</strong> {{ new Date(row.payment_date).toLocaleString() }}</p>
 <button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
-<button @click="deletePayment(row.payment_id)">Delete</button>
+<button @click="deletePayment(row.payment_id)" class="btn-delete">Delete</button>
     </template>
 
   </div>
