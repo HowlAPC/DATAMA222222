@@ -51,12 +51,6 @@
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
       <button @click="deleteCustomer(row.customer_id)">
   Delete
-  <button @click="openEditModal(row)">
-  Edit
-</button>
-<button @click="deleteCustomer(row.customer_id)">
-  Delete
-</button>
 </button>
     </template>
 
@@ -70,12 +64,6 @@
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
       <button @click="deleteEmployee(row.employee_id)">
   Delete
-  <button @click="openEditModal(row)">
-  Edit
-</button>
-<button @click="deleteEmployee(row.employee_id)">
-  Delete
-</button>
 </button>
     </template>
 
@@ -88,12 +76,6 @@
       <p><strong>Price:</strong> ₱{{ row.price }}</p>
       <button @click="deleteItem(row.item_id)">
   Delete
-  <button @click="openEditModal(row)">
-  Edit
-</button>
-<button @click="deleteItem(row.Item_id)">
-  Delete
-</button>
 </button>
     </template>
 
@@ -109,12 +91,6 @@
       <p><strong>Date:</strong> {{ new Date(row.date_created).toLocaleString() }}</p>
       <button @click="deleteReceipt(row.receipt_id)">
   Delete
-  <button @click="openEditModal(row)">
-  Edit
-</button>
-<button @click="deleteReceipt(row.receipt_id)">
-  Delete
-</button>
 </button>
     </template>
 
@@ -126,12 +102,6 @@
       <p><strong>Date:</strong> {{ new Date(row.payment_date).toLocaleString() }}</p>
       <button @click="deletePayment(row.payment_id)">
   Delete
-  <button @click="openEditModal(row)">
-  Edit
-</button>
-<button @click="deletePayment(row.payment_id)">
-  Delete
-</button>
 </button>
     </template>
 
@@ -171,7 +141,6 @@ const searchQuery = ref('')
 const activeTab = ref('customers')
 const isModalOpen = ref(false)
 const tabs = ['customers','employees','items','receipts','payments']
-
 
 // Login
 const user = ref(null)
