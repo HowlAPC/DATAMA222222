@@ -75,110 +75,134 @@ async function handleSubmit(){
     <div class="modal-card">
       <h3>Add New {{ activeTab.slice(0,-1) }}</h3>
       <hr />
+      <!-- RecordModal Form -->
       <form @submit.prevent="handleSubmit">
-      <!-- Customers -->
-      <div v-if="activeTab === 'customers'" class="input-group">
-        <input v-model="formData.first_name" placeholder=" " required />
-        <label>First Name</label>
 
-        <input v-model="formData.last_name" placeholder=" " required />
-        <label>Last Name</label>
-
-        <input v-model="formData.contact_number" placeholder=" " />
-        <label>Contact Number</label>
-
-        <input v-model="formData.special_instructions" placeholder=" " />
-        <label>Special Instructions</label>
-      </div>
-
-      <!-- Employees -->
-      <div v-if="activeTab === 'employees'" class="input-group">
-        <input v-model="formData.first_name" placeholder=" " required />
-        <label>First Name</label>
-
-        <input v-model="formData.last_name" placeholder=" " required />
-        <label>Last Name</label>
-
-        <input v-model="formData.contact_number" placeholder=" " />
-        <label>Contact Number</label>
-
-        <input v-model="formData.employee_type" placeholder=" " required />
-        <label>Position</label>
-
-        <input type="number" v-model.number="formData.salary" placeholder=" " />
-        <label>Salary</label>
-      </div>
-
-      <!-- Items -->
-      <div v-if="activeTab === 'items'" class="input-group">
-        <div class="select-wrapper">
-          <select v-model.number="formData.customer_id" required>
-            <option value="" disabled>Select Customer</option>
-            <option v-for="c in props.customers" :key="c.customer_id" :value="c.customer_id">
-              {{ c.first_name }} {{ c.last_name }} (ID: {{ c.customer_id }})
-            </option>
-          </select>
-          <label>Customer</label>
+        <!-- Customers -->
+        <div v-if="activeTab === 'customers'" class="form-grid">
+          <div class="input-group">
+            <input v-model="formData.first_name" placeholder=" " required />
+            <label>First Name</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.last_name" placeholder=" " required />
+            <label>Last Name</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.contact_number" placeholder=" " />
+            <label>Contact Number</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.special_instructions" placeholder=" " />
+            <label>Special Instructions</label>
+          </div>
         </div>
 
-        <div class="select-wrapper">
-          <select v-model.number="formData.employee_id" required>
-            <option value="" disabled>Select Employee</option>
-            <option v-for="e in props.employees" :key="e.employee_id" :value="e.employee_id">
-              {{ e.first_name }} {{ e.last_name }} (ID: {{ e.employee_id }})
-            </option>
-          </select>
-          <label>Employee</label>
+        <!-- Employees -->
+        <div v-if="activeTab === 'employees'" class="form-grid">
+          <div class="input-group">
+            <input v-model="formData.first_name" placeholder=" " required />
+            <label>First Name</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.last_name" placeholder=" " required />
+            <label>Last Name</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.contact_number" placeholder=" " />
+            <label>Contact Number</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.employee_type" placeholder=" " required />
+            <label>Position (e.g. Cashier)</label>
+          </div>
+          <div class="input-group">
+            <input type="number" v-model.number="formData.salary" placeholder=" " />
+            <label>Salary</label>
+          </div>
         </div>
 
-        <input v-model="formData.item_type" placeholder=" " required />
-        <label>Item Type</label>
-
-        <input v-model="formData.fabric_type" placeholder=" " />
-        <label>Fabric</label>
-
-        <input type="number" step="0.1" v-model.number="formData.weight" placeholder=" " />
-        <label>Weight (kg)</label>
-
-        <input type="number" step="0.1" v-model.number="formData.price" placeholder=" " required />
-        <label>Price</label>
-      </div>
-      <!-- Receipts -->
-      <div v-if="activeTab === 'receipts'" class="input-group">
-        <input type="number" v-model.number="formData.total_amount" placeholder=" " required />
-        <label>Total Amount</label>
-
-        <select v-model="formData.status" required>
-          <option value="Pending">Pending</option>
-          <option value="Partial">Partial</option>
-          <option value="Paid">Paid</option>
-        </select>
-        <label>Status</label>
-      </div>
-
-      <!-- Payments -->
-      <div v-if="activeTab === 'payments'" class="input-group">
-        <div class="select-wrapper">
-          <select v-model.number="formData.receipt_id" required>
-            <option value="" disabled>Select Receipt</option>
-            <option v-for="r in props.receipts" :key="r.receipt_id" 
-                    v-if="r.status !== 'Paid'" 
-                    :value="r.receipt_id">
-              Receipt #{{ r.receipt_id }} - Customer ID: {{ r.customer_id }} - Total: ₱{{ r.total_amount }}
-            </option>
-          </select>
-          <label>Receipt (Pending / Partial)</label>
+        <!-- Items -->
+        <div v-if="activeTab === 'items'" class="form-grid">
+          <div class="input-group">
+            <select v-model.number="formData.customer_id" required>
+              <option value="" disabled>Select Customer</option>
+              <option v-for="c in customers" :key="c.customer_id" :value="c.customer_id">
+                {{ c.first_name }} {{ c.last_name }}
+              </option>
+            </select>
+            <label>Customer</label>
+          </div>
+          <div class="input-group">
+            <select v-model.number="formData.employee_id" required>
+              <option value="" disabled>Select Employee</option>
+              <option v-for="e in employees" :key="e.employee_id" :value="e.employee_id">
+                {{ e.first_name }} {{ e.last_name }}
+              </option>
+            </select>
+            <label>Employee</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.item_type" placeholder=" " required />
+            <label>Item Type</label>
+          </div>
+          <div class="input-group">
+            <input v-model="formData.fabric_type" placeholder=" " />
+            <label>Fabric Type</label>
+          </div>
+          <div class="input-group">
+            <input type="number" v-model.number="formData.weight" placeholder=" " step="0.1" />
+            <label>Weight (kg)</label>
+          </div>
+          <div class="input-group">
+            <input type="number" v-model.number="formData.price" placeholder=" " step="0.1" required />
+            <label>Price</label>
+          </div>
         </div>
 
-        <input type="number" step="0.1" v-model.number="formData.amount_paid" placeholder=" " required />
-        <label>Amount Paid</label>
+        <!-- Receipts -->
+        <div v-if="activeTab === 'receipts'" class="form-grid">
+          <div class="input-group">
+            <input v-model.number="formData.total_amount" placeholder=" " required />
+            <label>Total Amount</label>
+          </div>
+          <div class="input-group">
+            <select v-model="formData.status">
+              <option value="Pending">Pending</option>
+              <option value="Partial">Partial</option>
+              <option value="Paid">Paid</option>
+            </select>
+            <label>Status</label>
+          </div>
+        </div>
 
-        <input type="date" v-model="formData.payment_date" placeholder=" " required />
-        <label>Payment Date</label>
-      </div>
+        <!-- Payments -->
+        <div v-if="activeTab === 'payments'" class="form-grid">
+          <div class="input-group">
+            <select v-model.number="formData.receipt_id" required>
+              <option value="" disabled>Select Receipt</option>
+              <option v-for="r in receipts" :key="r.receipt_id" v-if="r.status !== 'Paid'" :value="r.receipt_id">
+                Receipt #{{ r.receipt_id }} - Customer ID: {{ r.customer_id }} - Total: ₱{{ r.total_amount }}
+              </option>
+            </select>
+            <label>Receipt</label>
+          </div>
+          <div class="input-group">
+            <input type="number" v-model.number="formData.amount_paid" placeholder=" " required />
+            <label>Amount Paid</label>
+          </div>
+          <div class="input-group">
+            <input type="date" v-model="formData.payment_date" required />
+            <label>Payment Date</label>
+          </div>
+        </div>
+
+        <!-- Actions -->
         <div class="actions">
           <button type="button" class="btn-cancel" @click="$emit('close')">Cancel</button>
-          <button type="submit" class="btn-save" :disabled="loading">{{loading?'Saving...':'Save Record'}}</button>
+          <button type="submit" class="btn-save" :disabled="loading">
+            {{ loading ? 'Saving...' : 'Save Record' }}
+          </button>
         </div>
       </form>
     </div>
