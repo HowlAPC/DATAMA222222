@@ -10,12 +10,6 @@ const props = defineProps({
   receipts: Array
 })
 
-defineProps({
-  table: String,
-  record: Object,
-  isEditing: Boolean
-})
-
 const emit = defineEmits(['close','refresh'])
 const loading = ref(false)
 const formData = ref({})
@@ -28,17 +22,6 @@ watch(() => props.activeTab, (tab) => {
   else if (tab==='payments') formData.value={receipt_id:null,amount_paid:0,payment_date:new Date().toISOString().split('T')[0]}
   else formData.value={}
 },{immediate:true})
-
-if (props.isEditing) {
-  await supabase
-    .from(props.table.slice(0, -1)) // remove "s"
-    .update(formData)
-    .eq(primaryKey, formData[primaryKey])
-} else {
-  await supabase
-    .from(props.table.slice(0, -1))
-    .insert([formData])
-}
 
 async function handleSubmit(){
   loading.value=true
