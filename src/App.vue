@@ -100,12 +100,12 @@ async function markAsPaid(receipt_id) {
 }
 
 // --- DELETE RECORD ---
-deleteRecord('customer', row.customer_id)
-deleteRecord('employee', row.employee_id)
-deleteRecord('item', row.item_id)
-deleteRecord('receipt', row.receipt_id)
-deleteRecord('payment', row.payment_id)
-
+async function deleteRecord(table, id) {
+  if (!confirm(`Are you sure you want to delete this ${table}?`)) return
+  const { error } = await supabase.from(table).delete().eq(`${table}_id`, id)
+  if (error) alert(error.message)
+  else fetchAllData()
+}
 </script>
 
 <template>
