@@ -198,5 +198,73 @@ async function markAsPaid(receipt_id) {
 </script>
 
 <style scoped>
-/* Use your previous CSS, just keep .dashboard, table, buttons, etc. */
+/* App.vue styles */
+.dashboard {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+  font-family: 'Inter', sans-serif;
+}
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.top-bar h1 { font-size: 1.8rem; color: #1e293b; }
+
+.add-btn {
+  background: linear-gradient(135deg,#10b981,#059669);
+  color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;
+  font-weight:600; transition:0.2s;
+}
+.add-btn:hover { background: linear-gradient(135deg,#059669,#047857); }
+.add-btn.logout { background:#ef4444; }
+.add-btn.logout:hover { background:#dc2626; }
+
+.search-input {
+  width: 100%; max-width: 350px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  font-size:1rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.search-input:focus { outline:2px solid #3b82f6; border-color:transparent; }
+
+.tabs { display:flex; gap:8px; margin-bottom:25px; border-bottom:1px solid #e2e8f0; overflow-x:auto; }
+.tabs button {
+  padding:10px 18px; border:none; background:transparent;
+  color:#64748b; cursor:pointer; border-radius:6px; font-weight:500; white-space:nowrap;
+  transition:0.2s;
+}
+.tabs button.active { background:#f1f5f9; color:#1e293b; font-weight:700; }
+
+table {
+  width:100%; border-collapse:collapse; background:white;
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+thead { background:#f8fafc; }
+th, td { text-align:left; padding:14px; font-size:0.9rem; color:#1e293b; }
+tr:nth-child(even){ background:#f9fafb; }
+tr:hover { background:#f1f5f9; }
+.status-pill {
+  padding:4px 10px; border-radius:999px; font-size:0.75rem; font-weight:600;
+}
+.status-pill.Paid { background:#dcfce7; color:#166534; }
+.status-pill.Pending { background:#fef3c7; color:#92400e; }
+.status-pill.Partial { background:#fee2e2; color:#991b1b; }
+
+.loader { text-align:center; padding:100px; color:#64748b; }
+.empty-state { text-align:center; padding:50px; color:#94a3b8; font-style:italic; }
+
+@media (max-width:768px){
+  .dashboard{ padding:1rem; }
+  .top-bar { flex-direction:column; align-items:flex-start; }
+  table { display:block; overflow-x:auto; }
+}
 </style>

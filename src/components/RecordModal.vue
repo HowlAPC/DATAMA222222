@@ -130,13 +130,32 @@ async function handleSubmit(){
 </template>
 
 <style scoped>
-.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:50}
-.modal-card{background:white;padding:1.5rem;border-radius:12px;min-width:320px;max-width:480px;box-shadow:0 6px 12px rgba(0,0,0,0.2)}
-.modal-card h3{margin-bottom:0.5rem}
-.modal-card hr{margin-bottom:1rem}
-label{display:block;margin-top:10px;font-weight:500}
-input, select{width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #ccc}
-.actions{display:flex;justify-content:flex-end;margin-top:1rem;gap:10px}
-.btn-cancel{background:#ef4444;color:white;padding:8px 14px;border:none;border-radius:6px;cursor:pointer}
-.btn-save{background:#10b981;color:white;padding:8px 14px;border:none;border-radius:6px;cursor:pointer}
+/* RecordModal.vue styles */
+.modal-overlay {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:50;
+  opacity:0; animation: fadeIn 0.2s forwards;
+}
+@keyframes fadeIn { to { opacity:1; } }
+
+.modal-card {
+  background:white; padding:1.5rem; border-radius:12px;
+  min-width:320px; max-width:480px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.modal-card h3 { margin-bottom:0.5rem; font-size:1.3rem; color:#1e293b; }
+.modal-card hr { margin-bottom:1rem; border-color:#e2e8f0; }
+
+label { display:block; margin-top:10px; font-weight:500; color:#334155; }
+input, select { width:100%; padding:10px; margin-top:4px; border-radius:6px; border:1px solid #cbd5e1; }
+input:focus, select:focus { outline:2px solid #3b82f6; border-color:transparent; }
+
+.actions {
+  display:flex; justify-content:flex-end; margin-top:1rem; gap:10px;
+}
+.btn-cancel{ background:#ef4444; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
+.btn-cancel:hover{ background:#dc2626; }
+.btn-save{ background:#10b981; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
+.btn-save:hover{ background:#059669; }
+.btn-save:disabled{ background:#a7f3d0; cursor:not-allowed; }
 </style>
