@@ -3,7 +3,7 @@
     <div class="page-title">Employees</div>
 
     <div class="card">
-      <button class="btn btn-primary" @click="showModal = true">
+      <button class="btn btn-primary" @click="openModal">
         + Add Employee
       </button>
     </div>
@@ -22,8 +22,8 @@
         <tbody>
           <tr v-for="emp in employees" :key="emp.employee_id">
             <td>{{ emp.employee_id }}</td>
-            <td>{{ emp.name }}</td>
-            <td>{{ emp.position }}</td>
+            <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+            <td>{{ emp.employee_type }}</td>
             <td>{{ emp.contact_number }}</td>
             <td>
               <button class="btn btn-danger" @click="deleteEmployee(emp.employee_id)">
@@ -35,23 +35,32 @@
       </table>
     </div>
 
-    <EmployeeModal v-if="showModal" @close="showModal = false" />
+    <!-- RECORD MODAL -->
+    <RecordModal
+      v-if="showModal"
+      :isOpen="showModal"
+      :activeTab="'employees'"
+      :employees="employees"
+      @close="showModal = false"
+      @refresh="fetchEmployees"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '../supabase'
-import EmployeeModal from '../components/EmployeeModal.vue'
+import RecordModal from '../components/RecordModal.vue'
 
 const employees = ref([])
 const showModal = ref(false)
 
-async function fetchEmployees() {
-  const { data, error } = await supabase
-    .from('employee')
-    .select('*')
+function openModal() {
+  showModal.value = true
+}
 
+async function fetchEmployees() {
+  const { data, error } = await supabase.from('employee').select('*')
   if (!error) employees.value = data
 }
 

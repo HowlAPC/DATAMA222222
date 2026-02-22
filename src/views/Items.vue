@@ -3,7 +3,7 @@
     <div class="page-title">Items / Services</div>
 
     <div class="card">
-      <button class="btn btn-primary" @click="showModal = true">
+      <button class="btn btn-primary" @click="openModal">
         + Add Item
       </button>
     </div>
@@ -35,21 +35,45 @@
       </table>
     </div>
 
-    <ItemModal v-if="showModal" @close="showModal = false" />
+    <RecordModal
+      v-if="showModal"
+      :isOpen="showModal"
+      :activeTab="'items'"
+      :customers="customers"
+      :employees="employees"
+      @close="showModal = false"
+      @refresh="fetchItems"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '../supabase'
-import ItemModal from '../components/ItemModal.vue'
+import RecordModal from '../components/RecordModal.vue'
 
 const items = ref([])
+const customers = ref([])
+const employees = ref([])
 const showModal = ref(false)
 
+function openModal() {
+  showModal.value = true
+}
+
 async function fetchItems() {
-  const { data } = await supabase.from('item').select('*')
-  items.value = data
+  const { data, error } = await supabase.from('item').select('*')
+  if (!error) items.value = data
+}
+
+async function fetchCustomers() {
+  const { data } = await supabase.from('customer').select('*')
+  customers.value = data || []
+}
+
+async function fetchEmployees() {
+  const { data } = await supabase.from('employee').select('*')
+  employees.value = data || []
 }
 
 async function deleteItem(id) {
@@ -57,5 +81,9 @@ async function deleteItem(id) {
   fetchItems()
 }
 
-onMounted(fetchItems)
+onMounted(() => {
+  fetchItems()
+  fetchCustomers()
+  fetchEmployees()
+})
 </script>

@@ -49,11 +49,11 @@ async function saveItem() {
     }
   ])
 
-  if (!error) {
+    if (!error) {
+    emit('refresh')
     emit('close')
-    location.reload()
-  } else {
+    } else {
     alert(error.message)
-  }
+    }
 }
 </script>

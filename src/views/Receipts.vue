@@ -3,7 +3,7 @@
     <div class="page-title">Receipts</div>
 
     <div class="card">
-      <button class="btn btn-primary" @click="showModal = true">
+      <button class="btn btn-primary" @click="openModal">
         + Create Receipt
       </button>
     </div>
@@ -19,32 +19,52 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="receipt in receipts" :key="receipt.receipt_id">
-            <td>{{ receipt.receipt_id }}</td>
-            <td>{{ receipt.customer_id }}</td>
-            <td>₱ {{ receipt.total_amount }}</td>
-            <td>{{ receipt.status }}</td>
+          <tr v-for="r in receipts" :key="r.receipt_id">
+            <td>{{ r.receipt_id }}</td>
+            <td>{{ r.customer_id }}</td>
+            <td>₱ {{ r.total_amount }}</td>
+            <td>{{ r.status }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <ReceiptModal v-if="showModal" @close="showModal = false" />
+    <RecordModal
+      v-if="showModal"
+      :isOpen="showModal"
+      :activeTab="'receipts'"
+      :customers="customers"
+      @close="showModal = false"
+      @refresh="fetchReceipts"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '../supabase'
-import ReceiptModal from '../components/ReceiptModal.vue'
+import RecordModal from '../components/RecordModal.vue'
 
 const receipts = ref([])
+const customers = ref([])
 const showModal = ref(false)
+
+function openModal() {
+  showModal.value = true
+}
 
 async function fetchReceipts() {
   const { data } = await supabase.from('receipt').select('*')
-  receipts.value = data
+  receipts.value = data || []
 }
 
-onMounted(fetchReceipts)
+async function fetchCustomers() {
+  const { data } = await supabase.from('customer').select('*')
+  customers.value = data || []
+}
+
+onMounted(() => {
+  fetchReceipts()
+  fetchCustomers()
+})
 </script>
