@@ -307,6 +307,13 @@ function openEditModal(row) {
   isEditing.value = true
   isModalOpen.value = true
 }
+
+function handleCloseModal() {
+  isModalOpen.value = false
+  isEditing.value = false
+  selectedRecord.value = null
+}
+
 </script>
 
 <style scoped>
