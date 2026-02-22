@@ -39,79 +39,63 @@
       <p>Updating records...</p>
     </div>
 
-    <div v-else class="content">
-      <table>
-        <thead>
-          <tr v-if="activeTab==='customers'">
-            <th>ID</th><th>First Name</th><th>Last Name</th><th>Contact</th><th>Special Instructions</th><th>Created At</th>
-          </tr>
-          <tr v-if="activeTab==='employees'">
-            <th>ID</th><th>First Name</th><th>Last Name</th><th>Contact</th><th>Salary</th><th>Position</th><th>Created At</th>
-          </tr>
-          <tr v-if="activeTab==='items'">
-            <th>ID</th><th>Receipt ID</th><th>Type</th><th>Fabric</th><th>Weight</th><th>Price</th>
-          </tr>
-          <tr v-if="activeTab==='receipts'">
-            <th>ID</th><th>Customer ID</th><th>Employee ID</th><th>Total</th><th>Status</th><th>Date</th>
-          </tr>
-          <tr v-if="activeTab==='payments'">
-            <th>ID</th><th>Receipt ID</th><th>Amount</th><th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in filteredData" :key="row.customer_id || row.employee_id || row.item_id || row.receipt_id || row.payment_id">
-            <template v-if="activeTab==='customers'">
-              <td>{{ row.customer_id }}</td>
-              <td>{{ row.first_name }}</td>
-              <td>{{ row.last_name }}</td>
-              <td>{{ row.contact_number }}</td>
-              <td>{{ row.special_instructions || '-' }}</td>
-              <td>{{ new Date(row.created_at).toLocaleString() }}</td>
-            </template>
-            <template v-if="activeTab==='employees'">
-              <td>{{ row.employee_id }}</td>
-              <td>{{ row.first_name }}</td>
-              <td>{{ row.last_name }}</td>
-              <td>{{ row.contact_number }}</td>
-              <td>₱{{ row.salary }}</td>
-              <td>{{ row.employee_type }}</td>
-              <td>{{ new Date(row.created_at).toLocaleString() }}</td>
-            </template>
-            <template v-if="activeTab==='items'">
-              <td>{{ row.item_id }}</td>
-              <td>{{ row.receipt_id }}</td>
-              <td>{{ row.item_type }}</td>
-              <td>{{ row.fabric_type }}</td>
-              <td>{{ row.weight }} kg</td>
-              <td>₱{{ row.price }}</td>
-            </template>
-            <template v-if="activeTab==='receipts'">
-              <td>{{ row.receipt_id }}</td>
-              <td>{{ row.customer_id }}</td>
-              <td>{{ row.employee_id }}</td>
-              <td>₱{{ row.total_amount }}</td>
-              <td>
-                {{ row.status }}
-                <button v-if="row.status !== 'Paid'" @click="markAsPaid(row.receipt_id)" class="btn-pay">
-                  Mark as Paid
-                </button>
-              </td>
-              <td>{{ new Date(row.date_created).toLocaleString() }}</td>
-            </template>
-            <template v-if="activeTab==='payments'">
-              <td>{{ row.payment_id }}</td>
-              <td>{{ row.receipt_id }}</td>
-              <td>₱{{ row.amount_paid }}</td>
-              <td>{{ new Date(row.payment_date).toLocaleString() }}</td>
-            </template>
-          </tr>
-        </tbody>
-      </table>
+<div class="content">
+  <div v-for="row in filteredData" :key="row.customer_id || row.employee_id || row.item_id || row.receipt_id || row.payment_id" class="record-card">
 
-      <div v-if="filteredData.length===0" class="empty-state">
-        No records found matching your search.
-      </div>
-    </div>
+    <!-- Customers -->
+    <template v-if="activeTab === 'customers'">
+      <h4>{{ row.first_name }} {{ row.last_name }}</h4>
+      <p><strong>ID:</strong> {{ row.customer_id }}</p>
+      <p><strong>Contact:</strong> {{ row.contact_number }}</p>
+      <p><strong>Instructions:</strong> {{ row.special_instructions || '-' }}</p>
+      <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
+    </template>
+
+    <!-- Employees -->
+    <template v-if="activeTab === 'employees'">
+      <h4>{{ row.first_name }} {{ row.last_name }}</h4>
+      <p><strong>ID:</strong> {{ row.employee_id }}</p>
+      <p><strong>Contact:</strong> {{ row.contact_number }}</p>
+      <p><strong>Salary:</strong> ₱{{ row.salary }}</p>
+      <p><strong>Position:</strong> {{ row.employee_type }}</p>
+      <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
+    </template>
+
+    <!-- Items -->
+    <template v-if="activeTab === 'items'">
+      <h4>Item #{{ row.item_id }} - {{ row.item_type }}</h4>
+      <p><strong>Receipt ID:</strong> {{ row.receipt_id }}</p>
+      <p><strong>Fabric:</strong> {{ row.fabric_type }}</p>
+      <p><strong>Weight:</strong> {{ row.weight }} kg</p>
+      <p><strong>Price:</strong> ₱{{ row.price }}</p>
+    </template>
+
+    <!-- Receipts -->
+    <template v-if="activeTab === 'receipts'">
+      <h4>Receipt #{{ row.receipt_id }}</h4>
+      <p><strong>Customer ID:</strong> {{ row.customer_id }}</p>
+      <p><strong>Employee ID:</strong> {{ row.employee_id }}</p>
+      <p><strong>Total:</strong> ₱{{ row.total_amount }}</p>
+      <p><strong>Status:</strong> {{ row.status }}
+        <button v-if="row.status !== 'Paid'" @click="markAsPaid(row.receipt_id)" class="btn-pay">Mark as Paid</button>
+      </p>
+      <p><strong>Date:</strong> {{ new Date(row.date_created).toLocaleString() }}</p>
+    </template>
+
+    <!-- Payments -->
+    <template v-if="activeTab === 'payments'">
+      <h4>Payment #{{ row.payment_id }}</h4>
+      <p><strong>Receipt ID:</strong> {{ row.receipt_id }}</p>
+      <p><strong>Amount:</strong> ₱{{ row.amount_paid }}</p>
+      <p><strong>Date:</strong> {{ new Date(row.payment_date).toLocaleString() }}</p>
+    </template>
+
+  </div>
+
+  <div v-if="filteredData.length === 0" class="empty-state">
+    No records found matching your search.
+  </div>
+</div>
 
     <!-- Unified Modal for all tabs -->
     <RecordModal 
@@ -198,73 +182,119 @@ async function markAsPaid(receipt_id) {
 </script>
 
 <style scoped>
-/* App.vue styles */
 .dashboard {
   padding: 2rem;
   max-width: 1200px;
   margin: auto;
   font-family: 'Inter', sans-serif;
 }
+
+/* Top Bar */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
-.top-bar h1 { font-size: 1.8rem; color: #1e293b; }
-
+.top-bar h1 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+}
 .add-btn {
-  background: linear-gradient(135deg,#10b981,#059669);
-  color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;
-  font-weight:600; transition:0.2s;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
 }
-.add-btn:hover { background: linear-gradient(135deg,#059669,#047857); }
-.add-btn.logout { background:#ef4444; }
-.add-btn.logout:hover { background:#dc2626; }
+.add-btn:hover { background: #059669; }
 
+/* Search & Tabs */
+.controls { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
 .search-input {
-  width: 100%; max-width: 350px;
-  padding: 12px 14px;
-  margin-bottom: 20px;
-  border:1px solid #e2e8f0;
-  border-radius:10px;
-  font-size:1rem;
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.search-input:focus { outline:2px solid #3b82f6; border-color:transparent; }
+.search-input:focus { outline: 2px solid #3b82f6; border-color: transparent; }
 
-.tabs { display:flex; gap:8px; margin-bottom:25px; border-bottom:1px solid #e2e8f0; overflow-x:auto; }
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
 .tabs button {
-  padding:10px 18px; border:none; background:transparent;
-  color:#64748b; cursor:pointer; border-radius:6px; font-weight:500; white-space:nowrap;
-  transition:0.2s;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
 }
-.tabs button.active { background:#f1f5f9; color:#1e293b; font-weight:700; }
-
-table {
-  width:100%; border-collapse:collapse; background:white;
-  border-radius:12px; overflow:hidden;
-  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+.tabs button.active {
+  background: #3b82f6;
+  color: white;
+  font-weight: 700;
 }
-thead { background:#f8fafc; }
-th, td { text-align:left; padding:14px; font-size:0.9rem; color:#1e293b; }
-tr:nth-child(even){ background:#f9fafb; }
-tr:hover { background:#f1f5f9; }
-.status-pill {
-  padding:4px 10px; border-radius:999px; font-size:0.75rem; font-weight:600;
+
+/* Card Layout for Records */
+.content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
-.status-pill.Paid { background:#dcfce7; color:#166534; }
-.status-pill.Pending { background:#fef3c7; color:#92400e; }
-.status-pill.Partial { background:#fee2e2; color:#991b1b; }
+.record-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 1rem;
+  transition: 0.2s;
+}
+.record-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
 
-.loader { text-align:center; padding:100px; color:#64748b; }
-.empty-state { text-align:center; padding:50px; color:#94a3b8; font-style:italic; }
+.record-card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+.record-card p {
+  margin: 0.2rem 0;
+  font-size: 0.875rem;
+  color: #475569;
+}
+.btn-pay {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+.btn-pay:hover { background: #d97706; }
 
-@media (max-width:768px){
-  .dashboard{ padding:1rem; }
-  .top-bar { flex-direction:column; align-items:flex-start; }
-  table { display:block; overflow-x:auto; }
+.loader, .empty-state {
+  text-align: center;
+  padding: 80px;
+  color: #64748b;
+  font-style: italic;
+}
+
+@media (max-width:768px) {
+  .top-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .content { grid-template-columns: 1fr; }
 }
 </style>
