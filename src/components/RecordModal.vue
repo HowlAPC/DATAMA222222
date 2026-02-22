@@ -76,106 +76,50 @@ async function handleSubmit(){
       <h3>Add New {{ activeTab.slice(0,-1) }}</h3>
       <hr />
       <form @submit.prevent="handleSubmit">
-      <!-- Customers -->
-      <div v-if="activeTab === 'customers'" class="input-group">
-        <input v-model="formData.first_name" placeholder=" " required />
-        <label>First Name</label>
-
-        <input v-model="formData.last_name" placeholder=" " required />
-        <label>Last Name</label>
-
-        <input v-model="formData.contact_number" placeholder=" " />
-        <label>Contact Number</label>
-
-        <input v-model="formData.special_instructions" placeholder=" " />
-        <label>Special Instructions</label>
-      </div>
-
-      <!-- Employees -->
-      <div v-if="activeTab === 'employees'" class="input-group">
-        <input v-model="formData.first_name" placeholder=" " required />
-        <label>First Name</label>
-
-        <input v-model="formData.last_name" placeholder=" " required />
-        <label>Last Name</label>
-
-        <input v-model="formData.contact_number" placeholder=" " />
-        <label>Contact Number</label>
-
-        <input v-model="formData.employee_type" placeholder=" " required />
-        <label>Position</label>
-
-        <input type="number" v-model.number="formData.salary" placeholder=" " />
-        <label>Salary</label>
-      </div>
-
-      <!-- Items -->
-      <div v-if="activeTab === 'items'" class="input-group">
-        <div class="select-wrapper">
+        <div v-if="activeTab==='customers'">
+          <label>First Name</label><input v-model="formData.first_name" required/>
+          <label>Last Name</label><input v-model="formData.last_name" required/>
+          <label>Contact Number</label><input v-model="formData.contact_number"/>
+          <label>Special Instructions</label><input v-model="formData.special_instructions"/>
+        </div>
+        <div v-if="activeTab==='employees'">
+          <label>First Name</label><input v-model="formData.first_name" required/>
+          <label>Last Name</label><input v-model="formData.last_name" required/>
+          <label>Contact</label><input v-model="formData.contact_number"/>
+          <label>Position</label><input v-model="formData.employee_type" placeholder="e.g. Cashier" required/>
+          <label>Salary</label><input type="number" v-model.number="formData.salary"/>
+        </div>
+        <div v-if="activeTab==='items'">
+          <label>Customer</label>
           <select v-model.number="formData.customer_id" required>
             <option value="" disabled>Select Customer</option>
             <option v-for="c in props.customers" :key="c.customer_id" :value="c.customer_id">
               {{ c.first_name }} {{ c.last_name }} (ID: {{ c.customer_id }})
             </option>
           </select>
-          <label>Customer</label>
-        </div>
-
-        <div class="select-wrapper">
+          <label>Employee</label>
           <select v-model.number="formData.employee_id" required>
             <option value="" disabled>Select Employee</option>
             <option v-for="e in props.employees" :key="e.employee_id" :value="e.employee_id">
               {{ e.first_name }} {{ e.last_name }} (ID: {{ e.employee_id }})
             </option>
           </select>
-          <label>Employee</label>
+          <label>Item Type</label><input v-model="formData.item_type" placeholder="e.g. Laundry Load" required/>
+          <label>Fabric</label><input v-model="formData.fabric_type" placeholder="e.g. Cotton"/>
+          <label>Weight (kg)</label><input type="number" step="0.1" v-model.number="formData.weight"/>
+          <label>Price</label><input type="number" step="0.1" v-model.number="formData.price" required/>
         </div>
-
-        <input v-model="formData.item_type" placeholder=" " required />
-        <label>Item Type</label>
-
-        <input v-model="formData.fabric_type" placeholder=" " />
-        <label>Fabric</label>
-
-        <input type="number" step="0.1" v-model.number="formData.weight" placeholder=" " />
-        <label>Weight (kg)</label>
-
-        <input type="number" step="0.1" v-model.number="formData.price" placeholder=" " required />
-        <label>Price</label>
-      </div>
-      <!-- Receipts -->
-      <div v-if="activeTab === 'receipts'" class="input-group">
-        <input type="number" v-model.number="formData.total_amount" placeholder=" " required />
-        <label>Total Amount</label>
-
-        <select v-model="formData.status" required>
-          <option value="Pending">Pending</option>
-          <option value="Partial">Partial</option>
-          <option value="Paid">Paid</option>
-        </select>
-        <label>Status</label>
-      </div>
-
-      <!-- Payments -->
-      <div v-if="activeTab === 'payments'" class="input-group">
-        <div class="select-wrapper">
+        <div v-if="activeTab==='payments'">
+          <label>Receipt (Pending/Partial)</label>
           <select v-model.number="formData.receipt_id" required>
             <option value="" disabled>Select Receipt</option>
-            <option v-for="r in props.receipts" :key="r.receipt_id" 
-                    v-if="r.status !== 'Paid'" 
-                    :value="r.receipt_id">
-              Receipt #{{ r.receipt_id }} - Customer ID: {{ r.customer_id }} - Total: ₱{{ r.total_amount }}
+            <option v-for="r in props.receipts" :key="r.receipt_id" v-if="r.status!=='Paid'" :value="r.receipt_id">
+              Receipt #{{ r.receipt_id }} - Customer {{ r.customer_id }} - ₱{{ r.total_amount }}
             </option>
           </select>
-          <label>Receipt (Pending / Partial)</label>
+          <label>Amount Paid</label><input type="number" step="0.1" v-model.number="formData.amount_paid" required/>
+          <label>Payment Date</label><input type="date" v-model="formData.payment_date" required/>
         </div>
-
-        <input type="number" step="0.1" v-model.number="formData.amount_paid" placeholder=" " required />
-        <label>Amount Paid</label>
-
-        <input type="date" v-model="formData.payment_date" placeholder=" " required />
-        <label>Payment Date</label>
-      </div>
         <div class="actions">
           <button type="button" class="btn-cancel" @click="$emit('close')">Cancel</button>
           <button type="submit" class="btn-save" :disabled="loading">{{loading?'Saving...':'Save Record'}}</button>
@@ -281,65 +225,5 @@ select:not([value=""]) + label {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-bottom: 15px;
-}
-
-.input-group input,
-.input-group select {
-  padding: 12px 12px 12px 12px;
-  font-size: 1rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  outline: none;
-  transition: 0.2s;
-  width: 100%;
-}
-
-.input-group input:focus,
-.input-group select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.input-group label {
-  position: absolute;
-  left: 16px;
-  top: 12px;
-  color: #64748b;
-  pointer-events: none;
-  transition: 0.2s;
-  background: white;
-  padding: 0 4px;
-  font-size: 0.85rem;
-}
-
-.input-group input:focus + label,
-.input-group input:not(:placeholder-shown) + label,
-.select-wrapper select:focus + label,
-.select-wrapper select:not([value=""]) + label {
-  top: -8px;
-  left: 12px;
-  font-size: 0.75rem;
-  color: #3b82f6;
-}
-
-.select-wrapper {
-  position: relative;
-}
-
-.select-wrapper select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background: white url("data:image/svg+xml,%3Csvg fill='none' stroke='%2364748b' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 12px center;
-  background-size: 1em;
-  padding-right: 2.5em;
-  cursor: pointer;
 }
 </style>
