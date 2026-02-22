@@ -49,6 +49,9 @@
       <p><strong>Contact:</strong> {{ row.contact_number }}</p>
       <p><strong>Instructions:</strong> {{ row.special_instructions || '-' }}</p>
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
+      <button @click="deleteCustomer(row.customer_id)">
+  Delete
+</button>
     </template>
 
     <!-- Employees -->
@@ -59,6 +62,9 @@
       <p><strong>Salary:</strong> ₱{{ row.salary }}</p>
       <p><strong>Position:</strong> {{ row.employee_type }}</p>
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
+      <button @click="deleteEmployee(row.employee_id)">
+  Delete
+</button>
     </template>
 
     <!-- Items -->
@@ -68,6 +74,9 @@
       <p><strong>Fabric:</strong> {{ row.fabric_type }}</p>
       <p><strong>Weight:</strong> {{ row.weight }} kg</p>
       <p><strong>Price:</strong> ₱{{ row.price }}</p>
+      <button @click="deleteItem(row.item_id)">
+  Delete
+</button>
     </template>
 
     <!-- Receipts -->
@@ -80,6 +89,9 @@
         <button v-if="row.status !== 'Paid'" @click="markAsPaid(row.receipt_id)" class="btn-pay">Mark as Paid</button>
       </p>
       <p><strong>Date:</strong> {{ new Date(row.date_created).toLocaleString() }}</p>
+      <button @click="deleteReceipt(row.receipt_id)">
+  Delete
+</button>
     </template>
 
     <!-- Payments -->
@@ -88,6 +100,9 @@
       <p><strong>Receipt ID:</strong> {{ row.receipt_id }}</p>
       <p><strong>Amount:</strong> ₱{{ row.amount_paid }}</p>
       <p><strong>Date:</strong> {{ new Date(row.payment_date).toLocaleString() }}</p>
+      <button @click="deletePayment(row.payment_id)">
+  Delete
+</button>
     </template>
 
   </div>
@@ -178,6 +193,76 @@ async function markAsPaid(receipt_id) {
   const { error } = await supabase.rpc('mark_receipt_paid',{ p_receipt_id: receipt_id })
   if (error) alert(error.message)
   else fetchAllData()
+}
+/* ================= DELETE FUNCTIONS ================= */
+
+// DELETE CUSTOMER
+async function deleteCustomer(id) {
+  if (!confirm("Delete this customer?")) return
+
+  const { error } = await supabase
+    .from('customer')
+    .delete()
+    .eq('customer_id', id)
+
+  if (error) alert(error.message)
+  else customers.value = customers.value.filter(c => c.customer_id !== id)
+}
+
+
+// DELETE EMPLOYEE
+async function deleteEmployee(id) {
+  if (!confirm("Delete this employee?")) return
+
+  const { error } = await supabase
+    .from('employee')
+    .delete()
+    .eq('employee_id', id)
+
+  if (error) alert(error.message)
+  else employees.value = employees.value.filter(e => e.employee_id !== id)
+}
+
+
+// DELETE ITEM
+async function deleteItem(id) {
+  if (!confirm("Delete this item?")) return
+
+  const { error } = await supabase
+    .from('item')
+    .delete()
+    .eq('item_id', id)
+
+  if (error) alert(error.message)
+  else items.value = items.value.filter(i => i.item_id !== id)
+}
+
+
+// DELETE RECEIPT
+async function deleteReceipt(id) {
+  if (!confirm("Delete this receipt?")) return
+
+  const { error } = await supabase
+    .from('receipt')
+    .delete()
+    .eq('receipt_id', id)
+
+  if (error) alert(error.message)
+  else receipts.value = receipts.value.filter(r => r.receipt_id !== id)
+}
+
+
+// DELETE PAYMENT
+async function deletePayment(id) {
+  if (!confirm("Delete this payment?")) return
+
+  const { error } = await supabase
+    .from('payment')
+    .delete()
+    .eq('payment_id', id)
+
+  if (error) alert(error.message)
+  else payments.value = payments.value.filter(p => p.payment_id !== id)
 }
 </script>
 
