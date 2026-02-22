@@ -51,6 +51,12 @@
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
       <button @click="deleteCustomer(row.customer_id)">
   Delete
+  <button @click="openEditModal(row)">
+  Edit
+</button>
+<button @click="deleteCustomer(row.customer_id)">
+  Delete
+</button>
 </button>
     </template>
 
@@ -64,6 +70,12 @@
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
       <button @click="deleteEmployee(row.employee_id)">
   Delete
+  <button @click="openEditModal(row)">
+  Edit
+</button>
+<button @click="deleteEmployee(row.employee_id)">
+  Delete
+</button>
 </button>
     </template>
 
@@ -76,6 +88,12 @@
       <p><strong>Price:</strong> ₱{{ row.price }}</p>
       <button @click="deleteItem(row.item_id)">
   Delete
+  <button @click="openEditModal(row)">
+  Edit
+</button>
+<button @click="deleteItem(row.Item_id)">
+  Delete
+</button>
 </button>
     </template>
 
@@ -91,6 +109,12 @@
       <p><strong>Date:</strong> {{ new Date(row.date_created).toLocaleString() }}</p>
       <button @click="deleteReceipt(row.receipt_id)">
   Delete
+  <button @click="openEditModal(row)">
+  Edit
+</button>
+<button @click="deleteReceipt(row.receipt_id)">
+  Delete
+</button>
 </button>
     </template>
 
@@ -102,6 +126,12 @@
       <p><strong>Date:</strong> {{ new Date(row.payment_date).toLocaleString() }}</p>
       <button @click="deletePayment(row.payment_id)">
   Delete
+  <button @click="openEditModal(row)">
+  Edit
+</button>
+<button @click="deletePayment(row.payment_id)">
+  Delete
+</button>
 </button>
     </template>
 
@@ -121,6 +151,10 @@
       :receipts="receipts"
       @close="isModalOpen=false"
       @refresh="fetchAllData"
+      v-if="isModalOpen"
+      :table="activeTab"
+        :record="selectedRecord"
+  :isEditing="isEditing"
     />
   </main>
 </template>
@@ -141,6 +175,9 @@ const searchQuery = ref('')
 const activeTab = ref('customers')
 const isModalOpen = ref(false)
 const tabs = ['customers','employees','items','receipts','payments']
+
+const isEditing = ref(false)
+const selectedRecord = ref(null)
 
 // Login
 const user = ref(null)
@@ -263,6 +300,12 @@ async function deletePayment(id) {
 
   if (error) alert(error.message)
   else payments.value = payments.value.filter(p => p.payment_id !== id)
+}
+
+function openEditModal(row) {
+  selectedRecord.value = { ...row }
+  isEditing.value = true
+  isModalOpen.value = true
 }
 </script>
 
