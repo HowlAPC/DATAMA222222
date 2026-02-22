@@ -5,231 +5,160 @@ import { supabase } from '../supabase'
 const props = defineProps({
   isOpen: Boolean,
   activeTab: String,
-  customers: Array,   // pass customers array
-  employees: Array,   // pass employees array
-  receipts: Array     // pass receipts array for payments dropdown
+  customers: Array,
+  employees: Array,
+  receipts: Array
 })
 
-const emit = defineEmits(['close', 'refresh'])
-
+const emit = defineEmits(['close','refresh'])
 const loading = ref(false)
 const formData = ref({})
 
-// Reset form structure whenever the active tab changes
-watch(() => props.activeTab, (newTab) => {
-  if (newTab === 'customers') {
-    formData.value = { first_name: '', last_name: '', contact_number: '', special_instructions: '' }
-  } else if (newTab === 'employees') {
-    formData.value = { first_name: '', last_name: '', contact_number: '', employee_type: '', salary: 0 }
-  } else if (newTab === 'items') {
-    formData.value = { customer_id: null, employee_id: null, item_type: '', weight: 0, fabric_type: '', price: 0 }
-  } else if (newTab === 'receipts') {
-    formData.value = { total_amount: 0, status: 'Pending' }
-  } else if (newTab === 'payments') {
-    formData.value = { receipt_id: null, amount_paid: 0, payment_date: new Date().toISOString().split('T')[0] }
-  } else {
-    formData.value = {}
-  }
-}, { immediate: true })
+watch(() => props.activeTab, (tab) => {
+  if (tab==='customers') formData.value={first_name:'',last_name:'',contact_number:'',special_instructions:''}
+  else if (tab==='employees') formData.value={first_name:'',last_name:'',contact_number:'',employee_type:'',salary:0}
+  else if (tab==='items') formData.value={customer_id:null,employee_id:null,item_type:'',weight:0,fabric_type:'',price:0}
+  else if (tab==='receipts') formData.value={total_amount:0,status:'Pending'}
+  else if (tab==='payments') formData.value={receipt_id:null,amount_paid:0,payment_date:new Date().toISOString().split('T')[0]}
+  else formData.value={}
+},{immediate:true})
 
-// --- Handle Submit for All Tabs ---
-async function handleSubmit() {
-  loading.value = true
-  const tableName = props.activeTab.replace(/s$/, '') // singular table name
+async function handleSubmit(){
+  loading.value=true
+  const tableName=props.activeTab.replace(/s$/,'')
+  try{
+    if(props.activeTab==='items'){
+      if(!formData.value.customer_id||!formData.value.employee_id){ alert('Select Customer and Employee'); loading.value=false; return}
+      const { data: itemData, error: itemError } = await supabase.from('item').insert([formData.value]).select().single()
+      if(itemError) throw new Error(itemError.message)
 
-  if (props.activeTab === 'items') {
-    // Validate dropdown selections
-    if (!formData.value.customer_id || !formData.value.employee_id) {
-      alert('Please select a Customer and Employee')
-      loading.value = false
-      return
-    }
+      const price=formData.value.price
+      const customer_id=formData.value.customer_id
+      const employee_id=formData.value.employee_id
 
-    // Insert item first
-    const { data: itemData, error: itemError } = await supabase
-      .from('item')
-      .insert([formData.value])
-      .select()
-      .single()
+      const { data: existingReceipt } = await supabase.from('receipt')
+        .select('*').eq('customer_id',customer_id).eq('employee_id',employee_id).eq('status','Pending').single()
 
-    if (itemError) {
-      alert('Error adding item: ' + itemError.message)
-      loading.value = false
-      return
-    }
-
-    const price = formData.value.price
-    const customer_id = formData.value.customer_id
-    const employee_id = formData.value.employee_id
-
-    // Check for existing pending receipt
-    const { data: existingReceipt } = await supabase
-      .from('receipt')
-      .select('*')
-      .eq('customer_id', customer_id)
-      .eq('employee_id', employee_id)
-      .eq('status', 'Pending')
-      .single()
-
-    let receipt_id
-    if (!existingReceipt) {
-      // Create new receipt
-      const { data: newReceipt, error: receiptError } = await supabase
-        .from('receipt')
-        .insert([{ customer_id, employee_id, total_amount: price, status: 'Pending', date_created: new Date().toISOString() }])
-        .select()
-        .single()
-
-      if (receiptError) {
-        alert('Error creating receipt: ' + receiptError.message)
-        loading.value = false
-        return
+      let receipt_id
+      if(!existingReceipt){
+        const { data: newReceipt, error: receiptError } = await supabase.from('receipt')
+          .insert([{customer_id,employee_id,total_amount:price,status:'Pending',date_created:new Date().toISOString()}])
+          .select().single()
+        if(receiptError) throw new Error(receiptError.message)
+        receipt_id=newReceipt.receipt_id
+      } else {
+        await supabase.from('receipt').update({total_amount: existingReceipt.total_amount+price}).eq('receipt_id',existingReceipt.receipt_id)
+        receipt_id=existingReceipt.receipt_id
       }
-      receipt_id = newReceipt.receipt_id
+      await supabase.from('item').update({receipt_id}).eq('item_id',itemData.item_id)
+
+    } else if(props.activeTab==='payments'){
+      const { error: payErr } = await supabase.from('payment').insert([formData.value])
+      if(payErr) throw new Error(payErr.message)
+      const { data: receipt } = await supabase.from('receipt').select('*').eq('receipt_id',formData.value.receipt_id).single()
+      const { data: totalPaidData } = await supabase.from('payment').select('amount_paid').eq('receipt_id',formData.value.receipt_id)
+      const totalPaid = totalPaidData.reduce((s,p)=>s+p.amount_paid,0)
+      const status = totalPaid>=receipt.total_amount?'Paid':'Partial'
+      await supabase.from('receipt').update({status}).eq('receipt_id',formData.value.receipt_id)
     } else {
-      // Update existing receipt total
-      const { error: updateError } = await supabase
-        .from('receipt')
-        .update({ total_amount: existingReceipt.total_amount + price })
-        .eq('receipt_id', existingReceipt.receipt_id)
-
-      if (updateError) {
-        alert('Error updating receipt: ' + updateError.message)
-        loading.value = false
-        return
-      }
-      receipt_id = existingReceipt.receipt_id
+      const { error } = await supabase.from(tableName).insert([formData.value])
+      if(error) throw new Error(error.message)
     }
 
-    // Update item with receipt_id
-    const { error: itemUpdateError } = await supabase
-      .from('item')
-      .update({ receipt_id })
-      .eq('item_id', itemData.item_id)
-
-    if (itemUpdateError) {
-      alert('Error linking item to receipt: ' + itemUpdateError.message)
-      loading.value = false
-      return
-    }
-
-  } else if (props.activeTab === 'payments') {
-    // Insert payment
-    const { data: paymentData, error: paymentError } = await supabase
-      .from('payment')
-      .insert([formData.value])
-      .select()
-      .single()
-
-    if (paymentError) {
-      alert('Error adding payment: ' + paymentError.message)
-      loading.value = false
-      return
-    }
-
-    // Update receipt status based on total paid
-    const { data: receipt } = await supabase
-      .from('receipt')
-      .select('*')
-      .eq('receipt_id', formData.value.receipt_id)
-      .single()
-
-    const { data: totalPaidData } = await supabase
-      .from('payment')
-      .select('amount_paid')
-      .eq('receipt_id', formData.value.receipt_id)
-
-    const totalPaid = totalPaidData.reduce((sum, p) => sum + p.amount_paid, 0)
-    const status = totalPaid >= receipt.total_amount ? 'Paid' : 'Partial'
-
-    await supabase
-      .from('receipt')
-      .update({ status })
-      .eq('receipt_id', formData.value.receipt_id)
-
-  } else {
-    // Customers / Employees / Receipts normal insert
-    const { error } = await supabase
-      .from(tableName)
-      .insert([formData.value])
-
-    if (error) {
-      alert('Error saving record: ' + error.message)
-      loading.value = false
-      return
-    }
-  }
-
-  emit('refresh')
-  emit('close')
-  loading.value = false
+    emit('refresh'); emit('close'); loading.value=false
+  } catch(e){ alert(e.message); loading.value=false }
 }
 </script>
 
 <template>
   <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-card">
-      <h3>Add New {{ activeTab.slice(0, -1) }}</h3>
+      <h3>Add New {{ activeTab.slice(0,-1) }}</h3>
       <hr />
-      
       <form @submit.prevent="handleSubmit">
-        <!-- Customers -->
-        <div v-if="activeTab === 'customers'">
-          <label>First Name</label>
-          <input v-model="formData.first_name" required />
-          <label>Last Name</label>
-          <input v-model="formData.last_name" required />
-          <label>Contact Number</label>
-          <input v-model="formData.contact_number" />
-          <label>Special Instructions</label>
-          <input v-model="formData.special_instructions" />
-        </div>
+      <!-- Customers -->
+      <div v-if="activeTab === 'customers'" class="input-group">
+        <input v-model="formData.first_name" placeholder=" " required />
+        <label>First Name</label>
 
-        <!-- Employees -->
-        <div v-if="activeTab === 'employees'">
-          <label>First Name</label>
-          <input v-model="formData.first_name" required />
-          <label>Last Name</label>
-          <input v-model="formData.last_name" required />
-          <label>Contact Number</label>
-          <input v-model="formData.contact_number" />
-          <label>Position</label>
-          <input v-model="formData.employee_type" required placeholder="e.g. Cashier" />
-          <label>Salary</label>
-          <input type="number" v-model.number="formData.salary" />
-        </div>
+        <input v-model="formData.last_name" placeholder=" " required />
+        <label>Last Name</label>
 
-        <!-- Items -->
-        <div v-if="activeTab === 'items'">
-          <label>Customer</label>
+        <input v-model="formData.contact_number" placeholder=" " />
+        <label>Contact Number</label>
+
+        <input v-model="formData.special_instructions" placeholder=" " />
+        <label>Special Instructions</label>
+      </div>
+
+      <!-- Employees -->
+      <div v-if="activeTab === 'employees'" class="input-group">
+        <input v-model="formData.first_name" placeholder=" " required />
+        <label>First Name</label>
+
+        <input v-model="formData.last_name" placeholder=" " required />
+        <label>Last Name</label>
+
+        <input v-model="formData.contact_number" placeholder=" " />
+        <label>Contact Number</label>
+
+        <input v-model="formData.employee_type" placeholder=" " required />
+        <label>Position</label>
+
+        <input type="number" v-model.number="formData.salary" placeholder=" " />
+        <label>Salary</label>
+      </div>
+
+      <!-- Items -->
+      <div v-if="activeTab === 'items'" class="input-group">
+        <div class="select-wrapper">
           <select v-model.number="formData.customer_id" required>
             <option value="" disabled>Select Customer</option>
             <option v-for="c in props.customers" :key="c.customer_id" :value="c.customer_id">
               {{ c.first_name }} {{ c.last_name }} (ID: {{ c.customer_id }})
             </option>
           </select>
+          <label>Customer</label>
+        </div>
 
-          <label>Employee</label>
+        <div class="select-wrapper">
           <select v-model.number="formData.employee_id" required>
             <option value="" disabled>Select Employee</option>
             <option v-for="e in props.employees" :key="e.employee_id" :value="e.employee_id">
               {{ e.first_name }} {{ e.last_name }} (ID: {{ e.employee_id }})
             </option>
           </select>
-
-          <label>Item Type</label>
-          <input v-model="formData.item_type" required placeholder="e.g. Laundry Load" />
-          <label>Fabric</label>
-          <input v-model="formData.fabric_type" placeholder="e.g. Cotton" />
-          <label>Weight (kg)</label>
-          <input type="number" step="0.1" v-model.number="formData.weight" />
-          <label>Price</label>
-          <input type="number" step="0.1" v-model.number="formData.price" required />
+          <label>Employee</label>
         </div>
 
-        <!-- Payments -->
-        <div v-if="activeTab === 'payments'">
-          <label>Receipt (Pending / Partial)</label>
+        <input v-model="formData.item_type" placeholder=" " required />
+        <label>Item Type</label>
+
+        <input v-model="formData.fabric_type" placeholder=" " />
+        <label>Fabric</label>
+
+        <input type="number" step="0.1" v-model.number="formData.weight" placeholder=" " />
+        <label>Weight (kg)</label>
+
+        <input type="number" step="0.1" v-model.number="formData.price" placeholder=" " required />
+        <label>Price</label>
+      </div>
+      <!-- Receipts -->
+      <div v-if="activeTab === 'receipts'" class="input-group">
+        <input type="number" v-model.number="formData.total_amount" placeholder=" " required />
+        <label>Total Amount</label>
+
+        <select v-model="formData.status" required>
+          <option value="Pending">Pending</option>
+          <option value="Partial">Partial</option>
+          <option value="Paid">Paid</option>
+        </select>
+        <label>Status</label>
+      </div>
+
+      <!-- Payments -->
+      <div v-if="activeTab === 'payments'" class="input-group">
+        <div class="select-wrapper">
           <select v-model.number="formData.receipt_id" required>
             <option value="" disabled>Select Receipt</option>
             <option v-for="r in props.receipts" :key="r.receipt_id" 
@@ -238,20 +167,179 @@ async function handleSubmit() {
               Receipt #{{ r.receipt_id }} - Customer ID: {{ r.customer_id }} - Total: ₱{{ r.total_amount }}
             </option>
           </select>
-
-          <label>Amount Paid</label>
-          <input type="number" step="0.1" v-model.number="formData.amount_paid" required />
-          <label>Payment Date</label>
-          <input type="date" v-model="formData.payment_date" required />
+          <label>Receipt (Pending / Partial)</label>
         </div>
 
+        <input type="number" step="0.1" v-model.number="formData.amount_paid" placeholder=" " required />
+        <label>Amount Paid</label>
+
+        <input type="date" v-model="formData.payment_date" placeholder=" " required />
+        <label>Payment Date</label>
+      </div>
         <div class="actions">
           <button type="button" class="btn-cancel" @click="$emit('close')">Cancel</button>
-          <button type="submit" class="btn-save" :disabled="loading">
-            {{ loading ? 'Saving...' : 'Save Record' }}
-          </button>
+          <button type="submit" class="btn-save" :disabled="loading">{{loading?'Saving...':'Save Record'}}</button>
         </div>
       </form>
     </div>
   </div>
 </template>
+
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  position: relative;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+form { display: flex; flex-direction: column; gap: 1.25rem; }
+
+label {
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  font-size: 0.9rem;
+  color: #64748b;
+  pointer-events: none;
+  transition: 0.2s ease all;
+  background: white;
+  padding: 0 4px;
+}
+
+input, select {
+  width: 100%;
+  padding: 14px 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  position: relative;
+}
+
+input:focus, select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label,
+select:focus + label,
+select:not([value=""]) + label {
+  top: -8px;
+  left: 10px;
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-cancel {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-cancel:hover { background: #dc2626; }
+
+.btn-save {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-save:hover { background: #059669; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 15px;
+}
+
+.input-group input,
+.input-group select {
+  padding: 12px 12px 12px 12px;
+  font-size: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  outline: none;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-group label {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  color: #64748b;
+  pointer-events: none;
+  transition: 0.2s;
+  background: white;
+  padding: 0 4px;
+  font-size: 0.85rem;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label,
+.select-wrapper select:focus + label,
+.select-wrapper select:not([value=""]) + label {
+  top: -8px;
+  left: 12px;
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: white url("data:image/svg+xml,%3Csvg fill='none' stroke='%2364748b' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 12px center;
+  background-size: 1em;
+  padding-right: 2.5em;
+  cursor: pointer;
+}
+</style>
