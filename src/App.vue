@@ -49,9 +49,8 @@
       <p><strong>Contact:</strong> {{ row.contact_number }}</p>
       <p><strong>Instructions:</strong> {{ row.special_instructions || '-' }}</p>
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
-      <button @click="deleteCustomer(row.customer_id)">
-  Delete
-</button>
+<button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
+<button @click="deleteCustomer(row.customer_id)">Delete</button>
     </template>
 
     <!-- Employees -->
@@ -62,9 +61,8 @@
       <p><strong>Salary:</strong> ₱{{ row.salary }}</p>
       <p><strong>Position:</strong> {{ row.employee_type }}</p>
       <p><strong>Created:</strong> {{ new Date(row.created_at).toLocaleString() }}</p>
-      <button @click="deleteEmployee(row.employee_id)">
-  Delete
-</button>
+<button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
+<button @click="deleteEmployee(row.employee_id)">Delete</button>
     </template>
 
     <!-- Items -->
@@ -74,9 +72,8 @@
       <p><strong>Fabric:</strong> {{ row.fabric_type }}</p>
       <p><strong>Weight:</strong> {{ row.weight }} kg</p>
       <p><strong>Price:</strong> ₱{{ row.price }}</p>
-      <button @click="deleteItem(row.item_id)">
-  Delete
-</button>
+<button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
+<button @click="deleteItem(row.item_id)">Delete</button>
     </template>
 
     <!-- Receipts -->
@@ -89,9 +86,8 @@
         <button v-if="row.status !== 'Paid'" @click="markAsPaid(row.receipt_id)" class="btn-pay">Mark as Paid</button>
       </p>
       <p><strong>Date:</strong> {{ new Date(row.date_created).toLocaleString() }}</p>
-      <button @click="deleteReceipt(row.receipt_id)">
-  Delete
-</button>
+<button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
+<button @click="deleteReceipt(row.receipt_id)">Delete</button>
     </template>
 
     <!-- Payments -->
@@ -100,9 +96,8 @@
       <p><strong>Receipt ID:</strong> {{ row.receipt_id }}</p>
       <p><strong>Amount:</strong> ₱{{ row.amount_paid }}</p>
       <p><strong>Date:</strong> {{ new Date(row.payment_date).toLocaleString() }}</p>
-      <button @click="deletePayment(row.payment_id)">
-  Delete
-</button>
+<button @click="() => { isModalOpen = true; editingRecord = row; isEditing = true }" class="btn-edit">Edit</button>
+<button @click="deletePayment(row.payment_id)">Delete</button>
     </template>
 
   </div>
@@ -119,6 +114,8 @@
       :customers="customers"
       :employees="employees"
       :receipts="receipts"
+      :isEditing="isEditing"
+      :record="editingRecord"
       @close="isModalOpen=false"
       @refresh="fetchAllData"
     />
@@ -141,6 +138,8 @@ const searchQuery = ref('')
 const activeTab = ref('customers')
 const isModalOpen = ref(false)
 const tabs = ['customers','employees','items','receipts','payments']
+const isEditing = ref(false)
+const editingRecord = ref(null)
 
 // Login
 const user = ref(null)

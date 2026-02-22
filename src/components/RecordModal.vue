@@ -7,66 +7,95 @@ const props = defineProps({
   activeTab: String,
   customers: Array,
   employees: Array,
-  receipts: Array
+  receipts: Array,
+  isEditing: Boolean,
+  record: Object
 })
 
 const emit = defineEmits(['close','refresh'])
 const loading = ref(false)
 const formData = ref({})
 
-watch(() => props.activeTab, (tab) => {
-  if (tab==='customers') formData.value={first_name:'',last_name:'',contact_number:'',special_instructions:''}
-  else if (tab==='employees') formData.value={first_name:'',last_name:'',contact_number:'',employee_type:'',salary:0}
-  else if (tab==='items') formData.value={customer_id:null,employee_id:null,item_type:'',weight:0,fabric_type:'',price:0}
-  else if (tab==='receipts') formData.value={total_amount:0,status:'Pending'}
-  else if (tab==='payments') formData.value={receipt_id:null,amount_paid:0,payment_date:new Date().toISOString().split('T')[0]}
-  else formData.value={}
-},{immediate:true})
-
-async function handleSubmit(){
-  loading.value=true
-  const tableName=props.activeTab.replace(/s$/,'')
-  try{
-    if(props.activeTab==='items'){
-      if(!formData.value.customer_id||!formData.value.employee_id){ alert('Select Customer and Employee'); loading.value=false; return}
-      const { data: itemData, error: itemError } = await supabase.from('item').insert([formData.value]).select().single()
-      if(itemError) throw new Error(itemError.message)
-
-      const price=formData.value.price
-      const customer_id=formData.value.customer_id
-      const employee_id=formData.value.employee_id
-
-      const { data: existingReceipt } = await supabase.from('receipt')
-        .select('*').eq('customer_id',customer_id).eq('employee_id',employee_id).eq('status','Pending').single()
-
-      let receipt_id
-      if(!existingReceipt){
-        const { data: newReceipt, error: receiptError } = await supabase.from('receipt')
-          .insert([{customer_id,employee_id,total_amount:price,status:'Pending',date_created:new Date().toISOString()}])
-          .select().single()
-        if(receiptError) throw new Error(receiptError.message)
-        receipt_id=newReceipt.receipt_id
-      } else {
-        await supabase.from('receipt').update({total_amount: existingReceipt.total_amount+price}).eq('receipt_id',existingReceipt.receipt_id)
-        receipt_id=existingReceipt.receipt_id
-      }
-      await supabase.from('item').update({receipt_id}).eq('item_id',itemData.item_id)
-
-    } else if(props.activeTab==='payments'){
-      const { error: payErr } = await supabase.from('payment').insert([formData.value])
-      if(payErr) throw new Error(payErr.message)
-      const { data: receipt } = await supabase.from('receipt').select('*').eq('receipt_id',formData.value.receipt_id).single()
-      const { data: totalPaidData } = await supabase.from('payment').select('amount_paid').eq('receipt_id',formData.value.receipt_id)
-      const totalPaid = totalPaidData.reduce((s,p)=>s+p.amount_paid,0)
-      const status = totalPaid>=receipt.total_amount?'Paid':'Partial'
-      await supabase.from('receipt').update({status}).eq('receipt_id',formData.value.receipt_id)
+watch(
+  () => [props.activeTab, props.record],
+  ([tab, record]) => {
+    if (props.isEditing && record) {
+      formData.value = { ...record } // prefill form with record
     } else {
-      const { error } = await supabase.from(tableName).insert([formData.value])
-      if(error) throw new Error(error.message)
+      // same initialization as before
+      if (tab === 'customers') formData.value = { first_name:'', last_name:'', contact_number:'', special_instructions:'' }
+      else if (tab === 'employees') formData.value = { first_name:'', last_name:'', contact_number:'', employee_type:'', salary:0 }
+      else if (tab === 'items') formData.value = { customer_id:null, employee_id:null, item_type:'', weight:0, fabric_type:'', price:0 }
+      else if (tab === 'receipts') formData.value = { total_amount:0, status:'Pending' }
+      else if (tab === 'payments') formData.value = { receipt_id:null, amount_paid:0, payment_date:new Date().toISOString().split('T')[0] }
+      else formData.value = {}
     }
+  },
+  { immediate:true }
+)
 
-    emit('refresh'); emit('close'); loading.value=false
-  } catch(e){ alert(e.message); loading.value=false }
+async function handleSubmit() {
+  loading.value = true
+  const tableName = props.activeTab.replace(/s$/,'') // remove "s" from table name
+  let primaryKey = ''
+  if (props.activeTab==='customers') primaryKey='customer_id'
+  else if (props.activeTab==='employees') primaryKey='employee_id'
+  else if (props.activeTab==='items') primaryKey='item_id'
+  else if (props.activeTab==='receipts') primaryKey='receipt_id'
+  else if (props.activeTab==='payments') primaryKey='payment_id'
+
+  try {
+    if (props.isEditing) {
+      // UPDATE existing record
+      await supabase
+        .from(tableName)
+        .update(formData.value)
+        .eq(primaryKey, formData.value[primaryKey])
+    } else {
+      // ADD new record
+      if (props.activeTab==='items') {
+        // your existing item + receipt logic here
+        if(!formData.value.customer_id||!formData.value.employee_id){ alert('Select Customer and Employee'); loading.value=false; return}
+        const { data: itemData, error: itemError } = await supabase.from('item').insert([formData.value]).select().single()
+        if(itemError) throw new Error(itemError.message)
+        const price = formData.value.price
+        const customer_id = formData.value.customer_id
+        const employee_id = formData.value.employee_id
+        const { data: existingReceipt } = await supabase.from('receipt')
+          .select('*').eq('customer_id',customer_id).eq('employee_id',employee_id).eq('status','Pending').single()
+        let receipt_id
+        if(!existingReceipt){
+          const { data: newReceipt, error: receiptError } = await supabase.from('receipt')
+            .insert([{customer_id,employee_id,total_amount:price,status:'Pending',date_created:new Date().toISOString()}])
+            .select().single()
+          if(receiptError) throw new Error(receiptError.message)
+          receipt_id = newReceipt.receipt_id
+        } else {
+          await supabase.from('receipt').update({total_amount: existingReceipt.total_amount+price}).eq('receipt_id',existingReceipt.receipt_id)
+          receipt_id = existingReceipt.receipt_id
+        }
+        await supabase.from('item').update({receipt_id}).eq('item_id',itemData.item_id)
+      } else if (props.activeTab==='payments') {
+        // your existing payment logic
+        const { error: payErr } = await supabase.from('payment').insert([formData.value])
+        if(payErr) throw new Error(payErr.message)
+        const { data: receipt } = await supabase.from('receipt').select('*').eq('receipt_id',formData.value.receipt_id).single()
+        const { data: totalPaidData } = await supabase.from('payment').select('amount_paid').eq('receipt_id',formData.value.receipt_id)
+        const totalPaid = totalPaidData.reduce((s,p)=>s+p.amount_paid,0)
+        const status = totalPaid>=receipt.total_amount?'Paid':'Partial'
+        await supabase.from('receipt').update({status}).eq('receipt_id',formData.value.receipt_id)
+      } else {
+        const { error } = await supabase.from(tableName).insert([formData.value])
+        if(error) throw new Error(error.message)
+      }
+    }
+    emit('refresh')
+    emit('close')
+    loading.value = false
+  } catch(e) {
+    alert(e.message)
+    loading.value = false
+  }
 }
 </script>
 
