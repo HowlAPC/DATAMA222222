@@ -111,21 +111,25 @@ async function handleSubmit(){
 
       <!-- Items -->
       <div v-if="activeTab === 'items'" class="input-group">
-        <select v-model.number="formData.customer_id" required>
-          <option value="" disabled>Select Customer</option>
-          <option v-for="c in props.customers" :key="c.customer_id" :value="c.customer_id">
-            {{ c.first_name }} {{ c.last_name }} (ID: {{ c.customer_id }})
-          </option>
-        </select>
-        <label>Customer</label>
+        <div class="select-wrapper">
+          <select v-model.number="formData.customer_id" required>
+            <option value="" disabled>Select Customer</option>
+            <option v-for="c in props.customers" :key="c.customer_id" :value="c.customer_id">
+              {{ c.first_name }} {{ c.last_name }} (ID: {{ c.customer_id }})
+            </option>
+          </select>
+          <label>Customer</label>
+        </div>
 
-        <select v-model.number="formData.employee_id" required>
-          <option value="" disabled>Select Employee</option>
-          <option v-for="e in props.employees" :key="e.employee_id" :value="e.employee_id">
-            {{ e.first_name }} {{ e.last_name }} (ID: {{ e.employee_id }})
-          </option>
-        </select>
-        <label>Employee</label>
+        <div class="select-wrapper">
+          <select v-model.number="formData.employee_id" required>
+            <option value="" disabled>Select Employee</option>
+            <option v-for="e in props.employees" :key="e.employee_id" :value="e.employee_id">
+              {{ e.first_name }} {{ e.last_name }} (ID: {{ e.employee_id }})
+            </option>
+          </select>
+          <label>Employee</label>
+        </div>
 
         <input v-model="formData.item_type" placeholder=" " required />
         <label>Item Type</label>
@@ -139,7 +143,6 @@ async function handleSubmit(){
         <input type="number" step="0.1" v-model.number="formData.price" placeholder=" " required />
         <label>Price</label>
       </div>
-
       <!-- Receipts -->
       <div v-if="activeTab === 'receipts'" class="input-group">
         <input type="number" v-model.number="formData.total_amount" placeholder=" " required />
@@ -155,15 +158,17 @@ async function handleSubmit(){
 
       <!-- Payments -->
       <div v-if="activeTab === 'payments'" class="input-group">
-        <select v-model.number="formData.receipt_id" required>
-          <option value="" disabled>Select Receipt</option>
-          <option v-for="r in props.receipts" :key="r.receipt_id" 
-                  v-if="r.status !== 'Paid'" 
-                  :value="r.receipt_id">
-            Receipt #{{ r.receipt_id }} - Customer ID: {{ r.customer_id }} - Total: ₱{{ r.total_amount }}
-          </option>
-        </select>
-        <label>Receipt (Pending / Partial)</label>
+        <div class="select-wrapper">
+          <select v-model.number="formData.receipt_id" required>
+            <option value="" disabled>Select Receipt</option>
+            <option v-for="r in props.receipts" :key="r.receipt_id" 
+                    v-if="r.status !== 'Paid'" 
+                    :value="r.receipt_id">
+              Receipt #{{ r.receipt_id }} - Customer ID: {{ r.customer_id }} - Total: ₱{{ r.total_amount }}
+            </option>
+          </select>
+          <label>Receipt (Pending / Partial)</label>
+        </div>
 
         <input type="number" step="0.1" v-model.number="formData.amount_paid" placeholder=" " required />
         <label>Amount Paid</label>
@@ -276,5 +281,65 @@ select:not([value=""]) + label {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 15px;
+}
+
+.input-group input,
+.input-group select {
+  padding: 12px 12px 12px 12px;
+  font-size: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  outline: none;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-group label {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  color: #64748b;
+  pointer-events: none;
+  transition: 0.2s;
+  background: white;
+  padding: 0 4px;
+  font-size: 0.85rem;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label,
+.select-wrapper select:focus + label,
+.select-wrapper select:not([value=""]) + label {
+  top: -8px;
+  left: 12px;
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: white url("data:image/svg+xml,%3Csvg fill='none' stroke='%2364748b' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 12px center;
+  background-size: 1em;
+  padding-right: 2.5em;
+  cursor: pointer;
 }
 </style>
