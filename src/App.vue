@@ -68,6 +68,14 @@ const filteredData = computed(() => {
 onMounted(async () => {
   const { data } = await supabase.auth.getUser()
   user.value = data.user
+  console.log('LOGGED IN USER:', user.value)
+
+  fetchAllData()
+  console.log('CUSTOMERS:', customers.value)
+  console.log('EMPLOYEES:', employees.value)
+  console.log('ITEMS:', items.value)
+  console.log('RECEIPTS:', receipts.value)
+  console.log('PAYMENTS:', payments.value)
 
   if (user.value) {
     const { data: empData } = await supabase
