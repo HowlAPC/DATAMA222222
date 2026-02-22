@@ -445,36 +445,4 @@ select:not([value=""]) + label {
   font-size: 0.75rem;
   color: #3b82f6;
 }
-.btn-edit {
-  background: #22c55e; /* green */
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-right: 5px;
-  transition: 0.2s;
-}
-
-.btn-edit:hover {
-  background: #16a34a; /* darker green */
-}
-
-.btn-delete {
-  background: #ef4444; /* red */
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.btn-delete:hover {
-  background: #dc2626; /* darker red */
-}
 </style>

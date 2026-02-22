@@ -381,4 +381,36 @@ async function deletePayment(id) {
   .top-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .content { grid-template-columns: 1fr; }
 }
+.btn-edit {
+  background: #22c55e; /* green */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 5px;
+  transition: 0.2s;
+}
+
+.btn-edit:hover {
+  background: #16a34a; /* darker green */
+}
+
+.btn-delete {
+  background: #ef4444; /* red */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-delete:hover {
+  background: #dc2626; /* darker red */
+}
 </style>
